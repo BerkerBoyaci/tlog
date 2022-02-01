@@ -1,8 +1,9 @@
 ﻿#include <iostream>
 #include <vector>
+#include <thread>
 #include "Logger.h"
 
-using namespace aricanli::general;
+using namespace Log;
 
 
 void test(std::weak_ptr<Logger<char>> log_ptr, size_t i) {

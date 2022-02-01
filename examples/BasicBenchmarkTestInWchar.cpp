@@ -1,10 +1,10 @@
 #include <iostream>
 #include "Logger.h"
 
-using namespace aricanli::general;
+using namespace Log;
 
 int main() {
-LoggerW::setLogOutput(L"basicLog/log/log.txt");
+	LoggerW::setLogOutput(L"basicLog/log/log.txt");
 	LoggerW::setLogPriority(LogPriority::Debug);
 	auto log = LoggerW::getInstance();
 	log->setFileLimit(10*1024*1024);

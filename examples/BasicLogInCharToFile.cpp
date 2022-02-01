@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Logger.h"
 
-using namespace aricanli::general;
+using namespace Log;
 
 int main() {
 

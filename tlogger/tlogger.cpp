@@ -1,20 +1,20 @@
 #include <iostream>
 #include "Logger.h"
 
-using namespace aricanli::general;
+using namespace Log;
 
 #define WLOG_TEST 0
 
 
 int main() {
 
-	//aricanli::general::Formatter<wchar_t> fd;
+	//Log::Formatter<wchar_t> fd;
 	//fd.getFormatter(L"MESSAGE:%m\tTIME:%t\tLINE:%l\tFUNC:%f",formatPattern::XML);
 	//auto ret = fd.format(__LINE__,_T(__FILE__) , L"berker", L"boyaci", L"123");
 	//std::wcout << ret << "\n";
 #if WLOG_TEST
 	// Usage Samples
-	Logger<wchar_t>::setLogOutput(L"log", L"txt");
+	Logger<wchar_t>::setLogOutput(L"log.txt");
 	Logger<wchar_t>::setLogPriority(LogPriority::Debug);
 	auto log = Logger<wchar_t>::getInstance();
 	log->setFormatter(L"MESSAGE:%m\tLINE:%l\tTIME:%t\tFUNC:%f");
@@ -56,7 +56,7 @@ int main() {
 #else 
 	/* Create log ->*/
 
-	Logger<char>::setLogOutput("log","txt");
+	Logger<char>::setLogOutput("log.txt");
 	Logger<char>::setLogPriority(LogPriority::Debug);
 	auto log = Logger<char>::getInstance();
 	log->setFormatter("%m %l %t %f"); 
