@@ -25,7 +25,7 @@ namespace Log
 
 	// LogPriority enum class
 	// Possible priority levels :
-	//Quiet , Fatal , Error , Warning , Info , Verbose , Debug , Trace
+	// Quiet , Fatal , Error , Warning , Info , Verbose , Debug , Trace
 	enum class LogPriority : unsigned int
 	{
 		Quiet = 0,
@@ -60,42 +60,55 @@ namespace Log
 	template <>
 	std::wostream &StreamWrapper<wchar_t>::tout = std::wcout;
 
-	// For PreC++17 to create a directory
 #if __cplusplus < 201703L
-
-	template <typename T>
-	static void t_mkdir(T)
+	class MakeDirectory
 	{
-	}
+	public:
+		virtual void mkdir(const std::string &fileName) = 0;
+		virtual void mkdir(const std::wstring &fileName) = 0;
+	};
 
+	class MakeDirectoryWindows final : public MakeDirectory
+	{
+	public:
+		static void mkdir(const std::string &fileName) override
+		{
+			_mkdir(t_path.c_str());
+		}
+		static void mkdir(const std::wstring &fileName) override
+		{
+			_wmkdir(t_path.c_str());
+		}
+	};
+
+	class MakeDirectoryLinux final : public MakeDirectory
+	{
+	public:
+		void mkdir(const std::string &fileName) override
+		{
+			mkdir(t_path.c_str(), 0777);
+		}
+		void mkdir(const std::wstring &fileName) override
+		{
+			std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> strconverter;
+			mkdir(strconverter.to_bytes(t_path).c_str(), 0777);
+		}
+	};
+
+	std::unique_ptr<MakeDirectory> MakeDirectoryFactory()
+	{
+		std::unique_ptr<MakeDirectory> ptr;
 #if defined _MSC_VER
-	template <>
-	static void t_mkdir(std::string t_path)
-	{
-		_mkdir(t_path.c_str());
+		ptr = std::make_unique<MakeDirectoryWindows>();
+#elif defined __linux__
+		ptr = std::make_unique<MakeDirectoryLinux>();
+#endif
+		return ptr;
 	}
 
-	template <>
-	static void t_mkdir(std::wstring t_path)
-	{
-		_wmkdir(t_path.c_str());
-	}
-#elif defined __GNUC__
-	template <>
-	static void t_mkdir(std::string t_path)
-	{
-		mkdir(t_path.c_str(), 0777);
-	}
-
-	template <>
-	static void t_mkdir(std::wstring t_path)
-	{
-		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> strconverter;
-		mkdir(strconverter.to_bytes(t_path).c_str(), 0777);
-	}
 #endif
 
-#endif
+
 	// Class Logger<>
 	// record of variadic arguments to selected stream in formatted string
 	// Example:
@@ -117,9 +130,9 @@ namespace Log
 		}
 
 		/*
-			* Get single instance or create new object if not created
-			* @return: std::shared_ptr<Logger>
-			*/
+		 * Get single instance or create new object if not created
+		 * @return: std::shared_ptr<Logger>
+		 */
 		static std::shared_ptr<Logger> getInstance()
 		{
 
@@ -129,10 +142,10 @@ namespace Log
 		}
 
 		/*
-			* Not set or call for stream to console
-			* Set log path as std::basic_string for stream to file
-			* @param t_filePath : basic_string<T>
-			*/
+		 * Not set or call for stream to console
+		 * Set log path as std::basic_string for stream to file
+		 * @param t_filePath : basic_string<T>
+		 */
 		static void setLogOutput(std::basic_string<T> t_filePath)
 		{
 
@@ -141,9 +154,9 @@ namespace Log
 		}
 
 		/*
-			* Set log priority level
-			* @param t_logPriority: enum class LogPriority
-			*/
+		 * Set log priority level
+		 * @param t_logPriority: enum class LogPriority
+		 */
 		static void setLogPriority(LogPriority t_logPriority)
 		{
 			std::lock_guard<std::mutex> _lock(m_mutex);
@@ -153,10 +166,10 @@ namespace Log
 		static void log(LogPriority messageLevel) {} // For Quiet priority
 
 		/*
-			* Log given message with defined parameters and pass LogMessage() function
-			* @param messageLevel: Log Level
-			* @param ...args: Variadic template arguments
-			*/
+		 * Log given message with defined parameters and pass LogMessage() function
+		 * @param messageLevel: Log Level
+		 * @param ...args: Variadic template arguments
+		 */
 		template <typename... Args>
 		static void log(LogPriority messageLevel, Args &&...args)
 		{
@@ -201,9 +214,9 @@ namespace Log
 		}
 
 		/*
-			* Get format type and pass to Formatter::getFormatter() function
-			* default as %t %m
-			*/
+		 * Get format type and pass to Formatter::getFormatter() function
+		 * default as %t %m
+		 */
 		static void setFormatter(const std::basic_string<T> &t_fmt)
 		{
 
@@ -212,8 +225,8 @@ namespace Log
 		}
 
 		/*
-			* Set file's limit (byte)
-			*/
+		 * Set file's limit (byte)
+		 */
 		static void setFileLimit(unsigned long long t_fileLimit)
 		{
 
@@ -222,10 +235,10 @@ namespace Log
 		}
 
 		/*
-			* Set output format
-			* if m_logPath is empty then stream to console
-			* if m_logPath is not empty then stream to file
-			*/
+		 * Set output format
+		 * if m_logPath is empty then stream to console
+		 * if m_logPath is not empty then stream to file
+		 */
 		static void setLogFormat()
 		{
 
@@ -242,11 +255,11 @@ namespace Log
 
 	protected:
 		/*
-			* Construct Logger class as singleton.
-			* client can not access default constructor
-			* if m_logPath string is empty select the stream as console
-			* else select the stream as file
-			*/
+		 * Construct Logger class as singleton.
+		 * client can not access default constructor
+		 * if m_logPath string is empty select the stream as console
+		 * else select the stream as file
+		 */
 		Logger() noexcept
 		{
 			setLogFormat();
@@ -254,11 +267,11 @@ namespace Log
 
 #if __cplusplus >= 201703L
 		/*
-			* For C++17 and C++20 versions
-			* Open file in UTF-8 standart in ofstream write or append mode
-			* if the parent path not exist then create directory
-			* @param t_path : filesystem::path
-			*/
+		 * For C++17 and C++20 versions
+		 * Open file in UTF-8 standart in ofstream write or append mode
+		 * if the parent path not exist then create directory
+		 * @param t_path : filesystem::path
+		 */
 		static void openFile(std::filesystem::path t_path)
 		{
 
@@ -290,11 +303,11 @@ namespace Log
 		}
 #else
 		/*
-			* For C++14 and previous versions
-			* Open file in UTF-8 standart in ofstream write or append mode
-			* if the parent path not exist then create directory
-			* @param t_path : basic_string<T>
-			*/
+		 * For C++14 and previous versions
+		 * Open file in UTF-8 standart in ofstream write or append mode
+		 * if the parent path not exist then create directory
+		 * @param t_path : basic_string<T>
+		 */
 		static void openFile(const std::basic_string<T> &t_path)
 		{
 
@@ -303,10 +316,11 @@ namespace Log
 			char delim = t_path.find('/') != std::string::npos ? '/' : '\\';
 			auto ret = split(t_path, delim);
 			std::basic_string<T> path;
+			auto makeDir = MakeDirectoryFactory();
 			for (int i = 0; i < ret.size() - 1; i++)
 			{
 				path += (i != 0) ? stringlit(T, "/") + ret[i] : ret[i];
-				t_mkdir(path);
+				makeDir->mkdir(path);
 			}
 #if defined _MSC_VER
 			m_ofs.imbue(std::locale(std::locale::empty(), new std::codecvt<wchar_t, char, mbstate_t>("en_US.utf8")));
@@ -318,10 +332,10 @@ namespace Log
 		}
 #endif
 		/*
-			* Pass argumants to set Formatter::format() and take back as formatted string
-			* and write the string to choosen stream in constructor
-			* @param ...args: Variadic template arguments
-			*/
+		 * Pass argumants to set Formatter::format() and take back as formatted string
+		 * and write the string to choosen stream in constructor
+		 * @param ...args: Variadic template arguments
+		 */
 		template <typename... Args>
 		static void LogMessage(Args &&...args)
 		{
@@ -343,12 +357,12 @@ namespace Log
 		}
 
 		/*
-			* Divides a String into an ordered list of substrings, puts these substrings into
-			* an vector of string
-			* @param strSplit: basic_string<T>
-			* @param Delim: Template argument
-			* @return : result : vector<basic_string<T>>
-			*/
+		 * Divides a String into an ordered list of substrings, puts these substrings into
+		 * an vector of string
+		 * @param strSplit: basic_string<T>
+		 * @param Delim: Template argument
+		 * @return : result : vector<basic_string<T>>
+		 */
 		static std::vector<std::basic_string<T>> split(const std::basic_string<T> &strSplit, T delim)
 		{
 			std::vector<std::basic_string<T>> result;
@@ -378,7 +392,7 @@ namespace Log
 #define LOG_QUIET()
 #define LOG_SET_FORMAT_C(formatter) Log::Logger<char>::setFormatter(formatter)
 #define LOG_SET_FILE_LIMIT_C(fileLimit) Log::Logger<char>::setFileLimit(fileLimit)
-#define LOG_SET_OUTPUT_C(path)                           \
+#define LOG_SET_OUTPUT_C(path)             \
 	Log::Logger<char>::setLogOutput(path); \
 	Log::Logger<char>::setLogFormat()
 #define LOG_SET_PRIORITY_C(severity) \
@@ -393,7 +407,7 @@ namespace Log
 #define LOG_TRACE_C(...) Log::Logger<char>::log(Log::LogPriority::Trace, __VA_ARGS__)
 
 #define LOG_SET_FORMAT_W(formatter) Log::Logger<wchar_t>::setFormatter(formatter)
-#define LOG_SET_OUTPUT_W(path)                              \
+#define LOG_SET_OUTPUT_W(path)                \
 	Log::Logger<wchar_t>::setLogOutput(path); \
 	Log::Logger<wchar_t>::setLogFormat()
 #define LOG_SET_FILE_LIMIT_W(fileLimit) \

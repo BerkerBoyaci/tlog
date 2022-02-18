@@ -6,7 +6,7 @@ using namespace Log;
 int main() {
 
 	LOG_SET_FORMAT_C(" %m %t ");
-	LOG_SET_OUTPUT_C("Log//log.txt");
+	LOG_SET_OUTPUT_C("Log//BasicLog//log.txt");
 	LOG_SET_PRIORITY_C(56);
 
 	LOG_FATAL_C(__LINE__, __FILE__, "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "Sed ornare commodo urna, eget sollicitudin ex eleifend ut.  ");
