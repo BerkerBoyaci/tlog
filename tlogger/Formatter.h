@@ -29,6 +29,8 @@ namespace Log
 							  const char (&s0)[SZ0],
 							  const wchar_t (&s1)[SZ1]) -> const char (&)[SZ0]
 	{
+		(void)c;
+		(void)s1;
 		return s0;
 	}
 
@@ -37,6 +39,8 @@ namespace Log
 							  const char (&s0)[SZ0],
 							  const wchar_t (&s1)[SZ1]) -> const wchar_t (&)[SZ1]
 	{
+		(void)c;
+		(void)s0;
 		return s1;
 	}
 

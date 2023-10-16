@@ -135,7 +135,6 @@ namespace Log
 		 */
 		static std::shared_ptr<Logger> getInstance()
 		{
-
 			if (loggerInstance == nullptr)
 				loggerInstance = std::shared_ptr<Logger<T>>(new Logger<T>{});
 			return loggerInstance;
@@ -146,7 +145,7 @@ namespace Log
 		 * Set log path as std::basic_string for stream to file
 		 * @param t_filePath : basic_string<T>
 		 */
-		static void setLogOutput(std::basic_string<T> t_filePath)
+		static void setLogOutput(std::string t_filePath)
 		{
 
 			std::lock_guard<std::mutex> _lock(m_mutex);
@@ -163,7 +162,10 @@ namespace Log
 			m_logPriority = t_logPriority;
 		}
 
-		static void log(LogPriority messageLevel) {} // For Quiet priority
+		static void log(LogPriority messageLevel) 
+		{
+			(void)messageLevel;
+		} // For Quiet priority
 
 		/*
 		 * Log given message with defined parameters and pass LogMessage() function
@@ -242,7 +244,7 @@ namespace Log
 		static void setLogFormat()
 		{
 
-			if (m_logPath.empty())
+			if (m_logPath.size() == 0)
 			{
 				m_logOutput = LogOutput::Console;
 			}
@@ -308,14 +310,14 @@ namespace Log
 		 * if the parent path not exist then create directory
 		 * @param t_path : basic_string<T>
 		 */
-		static void openFile(const std::basic_string<T> &t_path)
+		static void openFile(const std::string &t_path)
 		{
 
 			std::lock_guard<std::mutex> _lock(m_mutex);
 
 			char delim = t_path.find('/') != std::string::npos ? '/' : '\\';
 			auto ret = split(t_path, delim);
-			std::basic_string<T> path;
+			std::string path;
 			auto makeDir = MakeDirectoryFactory();
 			for (int i = 0; i < ret.size() - 1; i++)
 			{
@@ -380,15 +382,15 @@ namespace Log
 		static std::mutex m_mutex;
 		static Formatter<T> fmt;
 		static unsigned long long m_maxFileSize;
-		static std::basic_string<T> m_logPath;
+		static std::string m_logPath;
 		static std::basic_ofstream<T> m_ofs;
 		static std::shared_ptr<Logger<T>> loggerInstance;
 		static LogPriority m_logPriority;
 		static LogOutput m_logOutput;
-		;
 	}; // end of class
 
 	// Macro definitions for Logger::log()
+	
 #define LOG_QUIET()
 #define LOG_SET_FORMAT_C(formatter) Log::Logger<char>::setFormatter(formatter)
 #define LOG_SET_FILE_LIMIT_C(fileLimit) Log::Logger<char>::setFileLimit(fileLimit)
@@ -432,11 +434,11 @@ namespace Log
 	template <typename T>
 	unsigned long long Logger<T>::m_maxFileSize = 512 * 1024 * 1024; // 512 MB
 	template <typename T>
+	std::string Logger<T>::m_logPath{};
+	template <typename T>
 	LogPriority Logger<T>::m_logPriority = LogPriority::Trace;
 	template <typename T>
 	LogOutput Logger<T>::m_logOutput = LogOutput::Console;
-	template <typename T>
-	std::basic_string<T> Logger<T>::m_logPath;
 	template <typename T>
 	std::shared_ptr<Logger<T>> Logger<T>::loggerInstance = nullptr;
 	template <typename T>
@@ -444,5 +446,6 @@ namespace Log
 
 	// template alias for Logger class
 	using LoggerW = Logger<wchar_t>;
+	using LoggerC = Logger<char>;
 
 } // end of Log namespace
