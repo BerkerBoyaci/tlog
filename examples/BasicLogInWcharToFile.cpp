@@ -1,15 +1,15 @@
 #include <iostream>
-#include "Logger.h"
+#include "logger.h"
 
 using namespace Log;
 
 int main() {
 
-	LoggerW::setLogOutput(L"log.txt");
-	LoggerW::setLogPriority(LogPriority::Trace);
-	auto log = LoggerW::getInstance();
-	log->setFileLimit(1024);
-	log->setFormatter(L"%t %m");
+	logger_w::set_log_output("log.txt");
+	logger_w::set_log_priority(LogPriority::Trace);
+	auto log = logger_w::get_instance();
+	log->set_file_limit(1_mb);
+	log->set_formatter(L" %m %t");
 	log->log(LogPriority::Quiet);
 
 	log->log(LogPriority::Quiet);

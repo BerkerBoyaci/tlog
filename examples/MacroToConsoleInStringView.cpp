@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string_view>
-#include "Logger.h"
+#include "logger.h"
 
 using namespace Log;
 

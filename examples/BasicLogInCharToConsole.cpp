@@ -1,13 +1,13 @@
 #include <iostream>
-#include "Logger.h"
+#include "logger.h"
 
 using namespace Log;
 
 int main() {
 
-	Logger<char>::setLogPriority(LogPriority::Trace);
-	auto log = Logger<char>::getInstance();
-	log->setFormatter("%m %t");
+	logger<char>::set_log_priority(LogPriority::Trace);
+	auto log = logger<char>::get_instance();
+	log->set_formatter("%m %t");
 	log->log(LogPriority::Quiet);
 
 	log->log(LogPriority::Quiet);

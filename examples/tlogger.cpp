@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Logger.h"
+#include "logger.h"
 
 using namespace Log;
 
@@ -14,10 +14,10 @@ int main() {
 	//std::wcout << ret << "\n";
 #if WLOG_TEST
 	// Usage Samples
-	Logger<wchar_t>::setLogOutput(L"log.txt");
-	Logger<wchar_t>::setLogPriority(LogPriority::Debug);
-	auto log = Logger<wchar_t>::getInstance();
-	log->setFormatter(L"MESSAGE:%m\tLINE:%l\tTIME:%t\tFUNC:%f");
+	logger_w::set_log_output(L"log.txt");
+	logger_w::set_log_priority(LogPriority::Debug);
+	auto log = logger_w::get_instance();
+	log->set_formatter(L"MESSAGE:%m\tLINE:%l\tTIME:%t\tFUNC:%f");
 
 	auto start1 = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < 100'000; i++)
@@ -56,11 +56,11 @@ int main() {
 #else 
 	/* Create log ->*/
 
-	Logger<char>::setLogOutput("log.txt");
-	Logger<char>::setLogPriority(LogPriority::Debug);
-	auto log = Logger<char>::getInstance();
-	log->setFormatter("%m %l %t %f"); 
-	log->setFileLimit(100);
+	logger_c::set_log_output("log.txt");
+	logger_c::set_log_priority(LogPriority::Debug);
+	auto log = logger_c::get_instance();
+	log->set_formatter("%m %l %t %f"); 
+	log->set_file_limit(100);
 
 	auto start1 = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < 100'000; i++)

@@ -47,35 +47,35 @@ namespace Log
 #define stringlit(code_unit, lit) \
 	_stringlit(code_unit(), lit, CPP_CONCAT(L, lit))
 
-	// Class Formatter
+	// Class formatter
 	// Log message formatter class
 	// f :function name  / l : line / m : message / t : time
 	// Example :
-	// Formatter fmt;
-	// fmt.getFormatter("%t %l %m %t")
+	// formatter fmt;
+	// fmt.getformatter("%t %l %m %t")
 	// auto fmt = fmt.format(line,func,...args);
 	template <typename T>
-	class Formatter
+	class formatter
 	{
 	public:
-		Formatter() noexcept = default;
-		Formatter(const Formatter &) noexcept = delete;
-		Formatter &operator=(const Formatter &) = delete;
+		formatter() noexcept = default;
+		formatter(const formatter &) noexcept = delete;
+		formatter &operator=(const formatter &) = delete;
 
 		/*
-			* Get format type as basic_string<T>
-			* @param fmtStr : basic_string<T>
-			*/
-		static void getFormatter(std::basic_string<T> fmt) noexcept
+		* Get format type as basic_string<T>
+		* @param fmtStr : basic_string<T>
+		*/
+		static void get_formatter(std::basic_string<T> fmt) noexcept
 		{
 
 			m_fmt = fmt;
 		}
 
 		/*
-			* Format given arguments with defined parameters and return as basic_string<T>
-			* @param ...args: Variadic template arguments
-			*/
+		* Format given arguments with defined parameters and return as basic_string<T>
+		* @param ...args: Variadic template arguments
+		*/
 		template <typename... Args>
 		static std::basic_string<T> format(Args &&...args)
 		{
@@ -90,7 +90,7 @@ namespace Log
 
 				(void)unused{
 					0, (oss << args << " ", 0)...};
-				t_format = findAndReplace(std::move(t_format), stringlit(T, "%m"), oss.str()); // char , wchar_t
+				t_format = find_and_replace(std::move(t_format), stringlit(T, "%m"), oss.str()); // char , wchar_t
 			}
 
 			// Time ->
@@ -102,28 +102,28 @@ namespace Log
 #if __cplusplus >= 201703L
 				if constexpr (std::is_same<T, char>::value)
 				{
-					oss << timePointAsString(std::chrono::system_clock::now()).c_str() << " ";
+					oss << time_point_as_string(std::chrono::system_clock::now()).c_str() << " ";
 				}
 #else
 				if (std::is_same<T, char>::value)
 				{
-					oss << timePointAsString(std::chrono::system_clock::now()).c_str() << " ";
+					oss << time_point_as_string(std::chrono::system_clock::now()).c_str() << " ";
 				}
 #endif
 
 #if __cplusplus >= 201703L
 				if constexpr (std::is_same<T, wchar_t>::value)
 				{
-					oss << timePointAsWString(std::chrono::system_clock::now()).c_str() << " ";
+					oss << time_point_as_string(std::chrono::system_clock::now()).c_str() << " ";
 				}
 #else
 				if (std::is_same<T, wchar_t>::value)
 				{
-					oss << timePointAsWString(std::chrono::system_clock::now()).c_str() << " ";
+					oss << time_point_as_wstring(std::chrono::system_clock::now()).c_str() << " ";
 				}
 #endif
 
-				t_format = findAndReplace(std::move(t_format), stringlit(T, "%t"), oss.str()); // char , wchar_t
+				t_format = find_and_replace(std::move(t_format), stringlit(T, "%t"), oss.str()); // char , wchar_t
 			}
 
 			return t_format;
@@ -137,7 +137,7 @@ namespace Log
 			* param t_replace: basic_string<T>
 			* return std::move(t_format): basic_string<T>
 			*/
-		static std::basic_string<T> findAndReplace(std::basic_string<T> t_format, const std::basic_string<T> &t_find, const std::basic_string<T> &t_replace)
+		static std::basic_string<T> find_and_replace(std::basic_string<T> t_format, const std::basic_string<T> &t_find, const std::basic_string<T> &t_replace)
 		{
 
 			t_format.replace(t_format.find(t_find), t_find.length(), t_replace);
@@ -165,7 +165,7 @@ namespace Log
 			* param : chrono::system_clock::timepoint
 			* return : basic_string<char>
 			*/
-		static std::basic_string<char> timePointAsString(const std::chrono::system_clock::time_point &tp)
+		static std::basic_string<char> time_point_as_string(const std::chrono::system_clock::time_point &tp)
 		{
 			std::time_t t = std::chrono::system_clock::to_time_t(tp);
 			char tmBuff[30];
@@ -185,15 +185,13 @@ namespace Log
 			* param : chrono::system_clock::timepoint
 			* return : basic_string<wchar_t>
 			*/
-		static std::basic_string<wchar_t> timePointAsWString(const std::chrono::system_clock::time_point &tp)
+		static std::basic_string<wchar_t> time_point_as_wstring(const std::chrono::system_clock::time_point &tp)
 		{
 			std::time_t t = std::chrono::system_clock::to_time_t(tp);
 			char tmBuff[30];
 #if defined _MSC_VER
 			ctime_s(tmBuff, sizeof(tmBuff), &t);
-
 #elif defined __GNUC__
-
 			ctime_r(&t, tmBuff);
 #endif
 			std::basic_string<char> ret = tmBuff;
@@ -208,6 +206,6 @@ namespace Log
 
 	// Intialize static data members
 	template <typename T>
-	std::basic_string<T> Formatter<T>::m_fmt = stringlit(T, "%m %t");
+	std::basic_string<T> formatter<T>::m_fmt = stringlit(T, "%m %t");
 
 } // end of Log namespace

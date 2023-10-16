@@ -1,12 +1,12 @@
 ﻿#include <iostream>
 #include <vector>
 #include <thread>
-#include "Logger.h"
+#include "logger.h"
 
 using namespace Log;
 
 
-void test(std::weak_ptr<Logger<char>> log_ptr, size_t i) {
+void test(std::weak_ptr<logger<char>> log_ptr, size_t i) {
 
 	auto t_sharedlockptr = log_ptr.lock();
 
@@ -18,22 +18,18 @@ void test(std::weak_ptr<Logger<char>> log_ptr, size_t i) {
 
 
 int main() {
-	Logger<char>::setLogOutput("log/log.txt");
-	Logger<char>::setLogPriority(LogPriority::Fatal);
-	auto log = Logger<char>::getInstance();
+	logger_c::set_log_output("log/log.txt");
+	logger_c::set_log_priority(LogPriority::Fatal);
+	auto log = logger_c::get_instance();
 	const size_t sizeThread = std::thread::hardware_concurrency();
 	std::vector<std::thread> t_vec;
-
-	
 
 	for (size_t i = 0; i < sizeThread; i++) {
 		t_vec.push_back(std::thread(test, log, i));
 	}
-		
 
 	for (auto& th : t_vec)
 		th.join();
-
 
 	return 0;
 }

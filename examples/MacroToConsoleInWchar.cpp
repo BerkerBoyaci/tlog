@@ -1,5 +1,5 @@
 ﻿#include <iostream>
-#include "Logger.h"
+#include "logger.h"
 
 using namespace Log;
 
@@ -7,7 +7,7 @@ using namespace Log;
 int main() {
 
 	LOG_SET_FORMAT_W(L"%m %t");
-	LOG_SET_PRIORITY_W(48);
+	LOG_SET_PRIORITY_W(LogPriority::Trace);
 	LOG_QUIET();
 	LOG_FATAL_W(__LINE__, L"Lorem ipsum dolor sit amet, consectetur adipiscing elit.", L"Sed ornare commodo urna, eget sollicitudin ex eleifend ut.  ");
 	LOG_ERROR_W(__LINE__, L"tellus felis condimentum odio, : ", 1, 'A', L"porta tincidunt lectus turpis id sem. Integer et est neque.", L"Vestibulum at maximus ante. ");

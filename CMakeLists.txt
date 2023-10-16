@@ -14,13 +14,13 @@ set(PROJECT_SOURCE_DIR ${PROJECT_DIR}/examples)
 
 set(PROJECT_SOURCES 
             #${PROJECT_SOURCE_DIR}/LogMacroToFileInChar.cpp
-            ${PROJECT_SOURCE_DIR}/MacroToFileInStringView.cpp
+            ${PROJECT_SOURCE_DIR}/BasicBenchmarkTestIInChar.cpp
 
     )
 
 set(PROJECT_HEADERS
-            ${PROJECT_INCLUDE_DIR}/Formatter.h
-            ${PROJECT_INCLUDE_DIR}/Logger.h
+            ${PROJECT_INCLUDE_DIR}/formatter.h
+            ${PROJECT_INCLUDE_DIR}/logger.h
     )
 
 

@@ -1,17 +1,18 @@
 ﻿#include <iostream>
-#include "Logger.h"
+#include "logger.h"
 
 using namespace Log;
 
 
 int main() {
 
-	LoggerW::setLogOutput(L"log/log.txt");
-	LoggerW::setLogPriority(LogPriority::Trace);
-	auto log = LoggerW::getInstance();
+	logger_w::set_log_output("log/log.txt");
+	logger_w::set_log_priority(LogPriority::Trace);
+	auto log = logger_w::get_instance();
+	log->set_formatter(L" %m %t");
 
 
-	log->log(LogPriority::Fatal, L"Привет, мир");
+	log->log(LogPriority::Fatal, L"test deneme123");
 	log->log(LogPriority::Error,L"नमस्ते दुनिया");
 	log->log(LogPriority::Warning, L"Γειά σου Κόσμε");
 	log->log(LogPriority::Info, L"こんにちは世界");

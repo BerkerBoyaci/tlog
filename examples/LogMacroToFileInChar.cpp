@@ -1,13 +1,13 @@
 #include <iostream>
-#include "Logger.h"
+#include "logger.h"
 
 using namespace Log;
 
 int main() {
 
 	LOG_SET_FORMAT_C(" %m %t ");
-	LOG_SET_OUTPUT_C("Log//BasicLog//log.txt");
-	LOG_SET_PRIORITY_C(56);
+	LOG_SET_OUTPUT_C("Log//BasicLog1//log.txt");
+	LOG_SET_PRIORITY_C(LogPriority::Info);
 
 	LOG_FATAL_C(__LINE__, __FILE__, "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "Sed ornare commodo urna, eget sollicitudin ex eleifend ut.  ");
 	LOG_ERROR_C(__LINE__, __FILE__, "tellus felis condimentum odio, : ", 1, 'A', "porta tincidunt lectus turpis id sem. Integer et est neque.", "Vestibulum at maximus ante. ");

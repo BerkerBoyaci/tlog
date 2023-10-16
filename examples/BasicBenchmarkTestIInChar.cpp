@@ -1,15 +1,15 @@
 #include <iostream>
-#include "Logger.h"
+#include "logger.h"
 
 using namespace Log;
 
 int main() {
 
-	Logger<char>::setLogOutput("basicLog/log/log.txt");
-	Logger<char>::setLogPriority(LogPriority::Debug);
-	auto log = Logger<char>::getInstance();
-	log->setFileLimit(10*1024*1024);
-	log->setFormatter("%t %m");
+	logger<char>::set_log_output("basicLog/log/log.txt");
+	logger<char>::set_log_priority(LogPriority::Debug);
+	auto log = logger<char>::get_instance();
+	log->set_file_limit(10_mb);
+	log->set_formatter("%t %m");
 	log->log(LogPriority::Quiet);
 
 	auto start1 = std::chrono::high_resolution_clock::now();
