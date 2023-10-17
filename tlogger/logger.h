@@ -20,6 +20,10 @@
 #endif
 #endif
 
+#if defined(ANDROID)
+#include <android/log.h>
+#endif
+
 namespace Log
 {
 
@@ -182,7 +186,12 @@ namespace Log
 		static void log(LogPriority messageLevel) 
 		{
 			(void)messageLevel;
-		} // 
+		}
+
+		static void enable_reset_file(bool enable_file_size)
+		{
+			m_enable_file_size = enable_file_size;
+		}
 
 		/*
 		 * Log given message with defined parameters and pass LogMessage() function
@@ -344,7 +353,7 @@ namespace Log
 			}
 #if defined _MSC_VER
 			m_ofs.imbue(std::locale(std::locale::empty(), new std::codecvt<wchar_t, char, mbstate_t>("en_US.utf8")));
-#elif defined __GNUC__
+#else
 			m_ofs.imbue(std::locale(std::locale(), new std::codecvt<wchar_t, char, mbstate_t>));
 #endif
 			m_ofs.open(t_path.c_str(), std::ofstream::out | std::ofstream::app);
@@ -359,21 +368,32 @@ namespace Log
 		template <typename... Args>
 		static void log_message(Args &&...args)
 		{
-
 			auto formattedStr = m_format.format(std::forward<Args>(args)...);
 
+#ifdef __ANDROID__
+                (void)__android_log_print(
+					static_cast<std::underlying_type_t<LogPriority>>(m_log_priority),
+					//this->m_file_name.c_str(),
+					"%s",
+					this->formattedStr.c_str()
+					);
+#else
 			formattedStr += '\n';
 			if (m_log_output == LogOutput::File)
 			{
-				if ((static_cast<unsigned long long>(m_ofs.tellp()) + formattedStr.length()) >= m_max_file_size)
+				if ((static_cast<unsigned long long>(m_ofs.tellp()) + formattedStr.length()) >= m_max_file_size
+					&& m_enable_file_size == true)
 				{
 					m_ofs.close();
 					m_ofs.open(m_log_path, std::ios::out | std::ios::trunc);
 				}
 				m_ofs << formattedStr.c_str();
 			}
+
+
 			if (m_log_output == LogOutput::Console)
 				StreamWrapper<T>::tout << formattedStr.c_str();
+#endif 
 		}
 
 		/*
@@ -397,6 +417,11 @@ namespace Log
 		}
 
 	protected:
+	    /**
+         * @brief .
+         * 
+         */
+		static bool m_enable_file_size;
 
 	    /**
          * @brief holds critical section.
@@ -507,6 +532,8 @@ namespace Log
 	unsigned long long logger<T>::m_max_file_size = 512 * 1024 *1024; // 512 MB
 	template <typename T>
 	std::string logger<T>::m_log_path{};
+	template <typename T>
+	bool logger<T>::m_enable_file_size{false};
 	template <typename T>
 	LogPriority logger<T>::m_log_priority = LogPriority::Trace;
 	template <typename T>
