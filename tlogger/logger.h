@@ -490,11 +490,14 @@ namespace Log
 	
 #define LOG_QUIET()
 #define LOG_SET_FORMAT_C(formatter) Log::logger<char>::set_formatter(formatter)
+
 #define LOG_SET_FILE_LIMIT_C(fileLimit) Log::logger<char>::set_file_limit(fileLimit)
-#define LOG_SET_OUTPUT_C(path)              \
+#define LOG_ENABLE_RESET_FILE_C(enable_reset_file)	\
+	Log::logger<char>::enable_reset_file(enable_reset_file)
+#define LOG_SET_OUTPUT_C(path)               \
 	Log::logger<char>::set_log_output(path); \
 	Log::logger<char>::set_log_format()
-#define LOG_SET_PRIORITY_C(severity) \
+#define LOG_SET_PRIORITY_C(severity) 		 \
 	Log::logger<char>::set_log_priority(static_cast<Log::LogPriority>(severity))
 
 #define LOG_FATAL_C(...) Log::logger<char>::log(Log::LogPriority::Fatal, __VA_ARGS__)
@@ -506,13 +509,15 @@ namespace Log
 #define LOG_TRACE_C(...) Log::logger<char>::log(Log::LogPriority::Trace, __VA_ARGS__)
 
 #define LOG_SET_FORMAT_W(formatter) Log::logger<wchar_t>::set_formatter(formatter)
-#define LOG_SET_OUTPUT_W(path)                \
+#define LOG_ENABLE_RESET_FILE_W(enable_reset_file)	\
+	Log::logger<wchar_t>::enable_reset_file(enable_reset_file)
+#define LOG_SET_OUTPUT_W(path)                  \
 	Log::logger<wchar_t>::set_log_output(path); \
 	Log::logger<wchar_t>::set_log_format()
-#define LOG_SET_FILE_LIMIT_W(fileLimit) \
+#define LOG_SET_FILE_LIMIT_W(fileLimit) 		\
 	Log::logger<wchar_t>::set_file_limit(fileLimit)
 
-#define LOG_SET_PRIORITY_W(severity) \
+#define LOG_SET_PRIORITY_W(severity)			\
 	Log::logger<wchar_t>::set_log_priority(static_cast<Log::LogPriority>(severity))
 
 #define LOG_FATAL_W(...) Log::logger<wchar_t>::log(Log::LogPriority::Fatal, __VA_ARGS__)
