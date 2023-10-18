@@ -2,6 +2,7 @@
 #include <sstream>
 #include <chrono>
 #include <type_traits>
+#include <codecvt>
 
 namespace Log
 {
@@ -66,10 +67,16 @@ namespace Log
 		* Get format type as basic_string<T>
 		* @param fmtStr : basic_string<T>
 		*/
-		static void get_formatter(std::basic_string<T> fmt) noexcept
+		static void set_formatter(std::basic_string<T> fmt) noexcept
 		{
 
 			m_fmt = fmt;
+		}
+
+		static std::basic_string<T> get_formatter()
+		{
+
+			return m_fmt;
 		}
 
 		/*

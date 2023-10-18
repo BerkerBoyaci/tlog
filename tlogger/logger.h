@@ -20,10 +20,6 @@
 #endif
 #endif
 
-#if defined(ANDROID)
-#include <android/log.h>
-#endif
-
 namespace Log
 {
 
@@ -36,6 +32,9 @@ namespace Log
 		return value * 1024 * 1024;
 	}
 
+	constexpr auto operator "" _gb(unsigned long long value) {
+		return value * 1024 * 1024 * 1024;
+	}
 
 	// LogPriority enum class
 	// Possible priority levels :
@@ -188,9 +187,10 @@ namespace Log
 			(void)messageLevel;
 		}
 
-		static void enable_reset_file(bool enable_file_size)
+		static void enable_reset_file(bool enable_file_reset)
 		{
-			m_enable_file_size = enable_file_size;
+			std::lock_guard<std::mutex> _lock(m_mutex);
+			m_enable_file_reset = enable_file_reset;
 		}
 
 		/*
@@ -250,7 +250,7 @@ namespace Log
 		{
 
 			std::lock_guard<std::mutex> _lock(m_mutex);
-			m_format.get_formatter(t_fmt);
+			m_format.set_formatter(t_fmt);
 		}
 
 		/*
@@ -315,7 +315,7 @@ namespace Log
 				}
 #if defined _MSC_VER
 				m_ofs.imbue(std::locale(std::locale::empty(), new std::codecvt<wchar_t, char, mbstate_t>("en_US.utf8")));
-#elif defined __GNUC__
+#else
 				m_ofs.imbue(std::locale(std::locale(), new std::codecvt<wchar_t, char, mbstate_t>));
 #endif
 				m_ofs.open(t_path, std::ofstream::out | std::ofstream::app);
@@ -369,20 +369,12 @@ namespace Log
 		static void log_message(Args &&...args)
 		{
 			auto formattedStr = m_format.format(std::forward<Args>(args)...);
-
-#ifdef __ANDROID__
-                (void)__android_log_print(
-					static_cast<std::underlying_type_t<LogPriority>>(m_log_priority),
-					//this->m_file_name.c_str(),
-					"%s",
-					this->formattedStr.c_str()
-					);
-#else
 			formattedStr += '\n';
+
 			if (m_log_output == LogOutput::File)
 			{
 				if ((static_cast<unsigned long long>(m_ofs.tellp()) + formattedStr.length()) >= m_max_file_size
-					&& m_enable_file_size == true)
+					&& m_enable_file_reset == true)
 				{
 					m_ofs.close();
 					m_ofs.open(m_log_path, std::ios::out | std::ios::trunc);
@@ -390,10 +382,10 @@ namespace Log
 				m_ofs << formattedStr.c_str();
 			}
 
-
 			if (m_log_output == LogOutput::Console)
+			{
 				StreamWrapper<T>::tout << formattedStr.c_str();
-#endif 
+			}
 		}
 
 		/*
@@ -418,10 +410,10 @@ namespace Log
 
 	protected:
 	    /**
-         * @brief .
+         * @brief Holds file reset information.
          * 
          */
-		static bool m_enable_file_size;
+		static bool m_enable_file_reset;
 
 	    /**
          * @brief holds critical section.
@@ -449,7 +441,7 @@ namespace Log
 		static std::string m_log_path;
 		
 		/**
-         * @brief 
+         * @brief Holds output file stream instance.
          * 
          */
 		static std::basic_ofstream<T> m_ofs;
@@ -528,28 +520,28 @@ namespace Log
 #define LOG_DEBUG_W(...) Log::logger<wchar_t>::log(Log::LogPriority::Debug, __VA_ARGS__)
 #define LOG_TRACE_W(...) Log::logger<wchar_t>::log(Log::LogPriority::Trace, __VA_ARGS__)
 
-	// Intialize static data members
-	template <typename T>
-	std::mutex logger<T>::m_mutex;
-	template <typename T>
-	std::basic_ofstream<T> logger<T>::m_ofs;
-	template <typename T>
-	unsigned long long logger<T>::m_max_file_size = 512 * 1024 *1024; // 512 MB
-	template <typename T>
-	std::string logger<T>::m_log_path{};
-	template <typename T>
-	bool logger<T>::m_enable_file_size{false};
-	template <typename T>
-	LogPriority logger<T>::m_log_priority = LogPriority::Trace;
-	template <typename T>
-	LogOutput logger<T>::m_log_output = LogOutput::Console;
-	template <typename T>
-	std::shared_ptr<logger<T>> logger<T>::m_logger_instance = nullptr;
-	template <typename T>
-	formatter<T> logger<T>::m_format;
+// Intialize static data members
+template <typename T>
+std::mutex logger<T>::m_mutex;
+template <typename T>
+std::basic_ofstream<T> logger<T>::m_ofs;
+template <typename T>
+unsigned long long logger<T>::m_max_file_size = 512 * 1024 *1024; // 512 MB
+template <typename T>
+std::string logger<T>::m_log_path{};
+template <typename T>
+bool logger<T>::m_enable_file_reset{false};
+template <typename T>
+LogPriority logger<T>::m_log_priority = LogPriority::Trace;
+template <typename T>
+LogOutput logger<T>::m_log_output = LogOutput::Console;
+template <typename T>
+std::shared_ptr<logger<T>> logger<T>::m_logger_instance = nullptr;
+template <typename T>
+formatter<T> logger<T>::m_format;
 
-	// template alias for logger class
-	using logger_w = logger<wchar_t>;
-	using logger_c = logger<char>;
+// template alias for logger class
+using logger_w = logger<wchar_t>;
+using logger_c = logger<char>;
 
 } // end of Log namespace
