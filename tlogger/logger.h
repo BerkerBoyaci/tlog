@@ -27,7 +27,6 @@ namespace Log
 		return value * 1024;
 	}
 
-
 	constexpr auto operator "" _mb(unsigned long long value) {
 		return value * 1024 * 1024;
 	}
@@ -156,6 +155,31 @@ namespace Log
 			return m_logger_instance;
 		}
 
+		static std::string get_log_output()
+		{
+			return m_log_path;
+		}
+
+		static LogPriority get_log_priority()
+		{
+			return m_log_priority;
+		}
+
+		static std::basic_string<T> get_formatter()
+		{
+			return m_format.get_formatter();
+		}
+
+		static unsigned long long  get_file_limit()
+		{
+			return m_max_file_size;
+		}
+
+		static LogOutput get_log_format()
+		{
+			return m_log_output;
+		}
+
 		/*
 		 * Not set or call for stream to console
 		 * Set log path as std::basic_string for stream to file
@@ -176,6 +200,47 @@ namespace Log
 		{
 			std::lock_guard<std::mutex> _lock(m_mutex);
 			m_log_priority = t_logPriority;
+		}
+
+		/*
+		 * Get format type and pass to Formatter::getFormatter() function
+		 * default as %t %m
+		 * @param t_fmt :  format style as string.
+		 */
+		static void set_formatter(const std::basic_string<T> &t_fmt)
+		{
+
+			std::lock_guard<std::mutex> _lock(m_mutex);
+			m_format.set_formatter(t_fmt);
+		}
+
+		/*
+		 * Set file's limit as byte.
+		 * @param t_fileLimit :  file size limit as byte.
+		 */
+		static void set_file_limit(unsigned long long t_fileLimit)
+		{
+			std::lock_guard<std::mutex> _lock(m_mutex);
+			m_max_file_size = t_fileLimit;
+		}
+
+		/*
+		 * Set output format
+		 * if m_log_path is empty then stream to console
+		 * if m_log_path is not empty then stream to file
+		 */
+		static void set_log_format()
+		{
+
+			if (m_log_path.size() == 0)
+			{
+				m_log_output = LogOutput::Console;
+			}
+			else
+			{
+				m_log_output = LogOutput::File;
+				openFile(m_log_path);
+			}
 		}
 
 		/*
@@ -241,46 +306,7 @@ namespace Log
 			}
 		}
 
-		/*
-		 * Get format type and pass to Formatter::getFormatter() function
-		 * default as %t %m
-		 * @param t_fmt :  format style as string.
-		 */
-		static void set_formatter(const std::basic_string<T> &t_fmt)
-		{
 
-			std::lock_guard<std::mutex> _lock(m_mutex);
-			m_format.set_formatter(t_fmt);
-		}
-
-		/*
-		 * Set file's limit as byte.
-		 * @param t_fileLimit :  file size limit as byte.
-		 */
-		static void set_file_limit(unsigned long long t_fileLimit)
-		{
-			std::lock_guard<std::mutex> _lock(m_mutex);
-			m_max_file_size = t_fileLimit;
-		}
-
-		/*
-		 * Set output format
-		 * if m_log_path is empty then stream to console
-		 * if m_log_path is not empty then stream to file
-		 */
-		static void set_log_format()
-		{
-
-			if (m_log_path.size() == 0)
-			{
-				m_log_output = LogOutput::Console;
-			}
-			else
-			{
-				m_log_output = LogOutput::File;
-				openFile(m_log_path);
-			}
-		}
 
 	protected:
 		/*
