@@ -74,51 +74,21 @@ namespace Log
 	std::wostream &StreamWrapper<wchar_t>::tout = std::wcout;
 
 #if __cplusplus < 201703L
-	class MakeDirectory
-	{
-	public:
-		virtual void mkdir(const std::string &fileName) = 0;
-		virtual void mkdir(const std::wstring &fileName) = 0;
-	};
 
-	class MakeDirectoryWindows final : public MakeDirectory
-	{
-	public:
-		static void mkdir(const std::string &fileName) override
-		{
-			_mkdir(t_path.c_str());
-		}
-		static void mkdir(const std::wstring &fileName) override
-		{
-			_wmkdir(t_path.c_str());
-		}
-	};
-
-	class MakeDirectoryLinux final : public MakeDirectory
-	{
-	public:
-		void mkdir(const std::string &fileName) override
-		{
-			mkdir(t_path.c_str(), 0777);
-		}
-		void mkdir(const std::wstring &fileName) override
-		{
-			std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> strconverter;
-			mkdir(strconverter.to_bytes(t_path).c_str(), 0777);
-		}
-	};
-
-	std::unique_ptr<MakeDirectory> MakeDirectoryFactory()
-	{
-		std::unique_ptr<MakeDirectory> ptr;
 #if defined _MSC_VER
-		ptr = std::make_unique<MakeDirectoryWindows>();
-#else
-		ptr = std::make_unique<MakeDirectoryLinux>();
-#endif
-		return ptr;
+
+	static void t_mkdir(std::string t_path)
+	{
+		_mkdir(t_path.c_str());
 	}
 
+#elif defined __GNUC__
+	static void t_mkdir(std::string t_path)
+	{
+		mkdir(t_path.c_str(), 0777);
+	}
+
+#endif
 #endif
 
 
@@ -239,7 +209,7 @@ namespace Log
 			else
 			{
 				m_log_output = LogOutput::File;
-				openFile(m_log_path);
+				open_file(m_log_path);
 			}
 		}
 
@@ -327,7 +297,7 @@ namespace Log
 		 * if the parent path not exist then create directory
 		 * @param t_path :  file path
 		 */
-		static void openFile(std::filesystem::path t_path)
+		static void open_file(std::filesystem::path t_path)
 		{
 
 			std::lock_guard<std::mutex> _lock(m_mutex);
@@ -367,15 +337,25 @@ namespace Log
 		{
 
 			std::lock_guard<std::mutex> _lock(m_mutex);
-
 			char delim = t_path.find('/') != std::string::npos ? '/' : '\\';
 			auto ret = split(t_path, delim);
 			std::string path;
-			auto makeDir = MakeDirectoryFactory();
+
 			for (int i = 0; i < ret.size() - 1; i++)
 			{
-				path += (i != 0) ? stringlit(T, "/") + ret[i] : ret[i];
-				makeDir->mkdir(path);
+				if(i != 0){
+					std::string tmpstr;
+					tmpstr.append(ret[i]);
+					std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> strconverter;
+					
+					tmpstr += strconverter.to_bytes( stringlit(T, "\\")).c_str();
+					path += tmpstr;
+				}
+				else
+				{
+					path.append(ret[i]);
+				}
+				t_mkdir(path);
 			}
 #if defined _MSC_VER
 			m_ofs.imbue(std::locale(std::locale::empty(), new std::codecvt<wchar_t, char, mbstate_t>("en_US.utf8")));
@@ -421,11 +401,12 @@ namespace Log
 		 * @param Delim: Template argument
 		 * @return : result : vector<basic_string<T>>
 		 */
-		static std::vector<std::basic_string<T>> split(const std::basic_string<T> &strSplit, T delim)
+		static std::vector<std::string> split(const std::string &strSplit, char delim)
 		{
-			std::vector<std::basic_string<T>> result;
-			std::basic_stringstream<T> ss(strSplit);
-			std::basic_string<T> item;
+			std::vector<std::string> result;
+			std::stringstream ss(strSplit);
+			std::string item;
+
 
 			while (getline(ss, item, delim))
 			{
