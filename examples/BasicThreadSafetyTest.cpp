@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include <vector>
 #include <thread>
-#include "logger.h"
+#include "logger.hpp"
 
 using namespace Log;
 

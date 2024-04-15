@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE MyTest
 #include <iostream>
 #include <boost/test/unit_test.hpp>
-#include "formatter.h"
+#include "formatter.hpp"
 
 using namespace Log;
 

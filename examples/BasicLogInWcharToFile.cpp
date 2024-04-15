@@ -1,5 +1,5 @@
 #include <iostream>
-#include "logger.h"
+#include "logger.hpp"
 
 using namespace Log;
 

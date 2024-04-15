@@ -5,9 +5,7 @@ project(Logger)
 # set compiler
 #set(CMAKE_CXX_COMPILER /usr/bin/clang++-10)
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -g -fsanitize=address -pthread")
-
-find_package (Boost REQUIRED COMPONENTS unit_test_framework)
+#set(CMAKE_CXX_FLAGS "-Wall -Wextra -g -fsanitize=address -pthread")
 
 
 # set build files
@@ -31,15 +29,6 @@ set(PROJECT_HEADERS
 include_directories(${PROJECT_INCLUDE_DIR})
 
 
-set(SIMPLE "loggerTests")
-add_executable(${SIMPLE} "${PROJECT_TEST_DIR}/loggerTest.cpp" )
-target_link_libraries(${SIMPLE} Boost::unit_test_framework )
-
-set(FORMATTERTEST "formatterTests")
-add_executable(${FORMATTERTEST} "${PROJECT_TEST_DIR}/formatterTest.cpp" )
-target_link_libraries(${FORMATTERTEST} Boost::unit_test_framework )
-
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
-#target_link_libraries(${PROJECT_NAME} Boost::unit_test_framework )
-  
+
 

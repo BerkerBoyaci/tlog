@@ -1,5 +1,5 @@
 #include <iostream>
-#include "logger.h"
+#include "logger.hpp"
 #include <cassert>
 using namespace Log;
 
