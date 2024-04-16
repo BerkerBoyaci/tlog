@@ -26,7 +26,7 @@
 #include <string_view>
 #include <filesystem>
 #else
-#if defined _MSC_VER
+#if defined _WIN32
 #include <direct.h>
 #elif defined __GNUC__
 #include <sys/types.h>
@@ -37,24 +37,50 @@
 namespace Log
 {
 
-	constexpr auto operator "" _kb(unsigned long long value)
+    /**
+     * @brief User-defined literal to convert value to kilobytes (KB).
+     *
+     * This constexpr operator converts a given value to kilobytes (KB) by multiplying it with 1024.
+     *
+     * @param value The value to be converted.
+     * @return The converted value in kilobytes.
+     */
+    constexpr auto operator "" _kb(unsigned long long value)
     {
-		return value * 1024;
-	}
+        return value * 1024;
+    }
 
-	constexpr auto operator "" _mb(unsigned long long value)
+    /**
+     * @brief User-defined literal to convert value to megabytes (MB).
+     *
+     * This constexpr operator converts a given value to megabytes (MB) by multiplying it with 1024 * 1024.
+     *
+     * @param value The value to be converted.
+     * @return The converted value in megabytes.
+     */
+    constexpr auto operator "" _mb(unsigned long long value)
     {
-		return value * 1024 * 1024;
-	}
+        return value * 1024 * 1024;
+    }
 
-	constexpr auto operator "" _gb(unsigned long long value)
+    /**
+     * @brief User-defined literal to convert value to gigabytes (GB).
+     *
+     * This constexpr operator converts a given value to gigabytes (GB) by multiplying it with 1024 * 1024 * 1024.
+     *
+     * @param value The value to be converted.
+     * @return The converted value in gigabytes.
+     */
+    constexpr auto operator "" _gb(unsigned long long value)
     {
-		return value * 1024 * 1024 * 1024;
-	}
+        return value * 1024 * 1024 * 1024;
+    }
 
-	// LogPriority enum class
-	// Possible priority levels :
-	// Quiet , Fatal , Error , Warning , Info , Verbose , Debug , Trace
+    /**
+     * @brief Enum class representing different log priority levels.
+     *
+     * This enum class defines possible priority levels for logging, ranging from Quiet to Trace.
+     */
 	enum class LogPriority : unsigned int
 	{
 		Quiet = 0,
@@ -67,16 +93,25 @@ namespace Log
 		Trace = 56
 	};
 
-	// LogOutput enum class
-	// Possible ways to stream
+    /**
+     * @brief Enum class representing different ways to stream log messages.
+     *
+     * This enum class defines possible ways to stream log messages, either to the console or to a file.
+     */
 	enum class LogOutput
 	{
 		Console,
 		File
 	};
 
-
-	// Stream wrapper class for console in char and wchar_t types
+    /**
+     * @brief Stream wrapper class for console output in character types.
+     *
+     * This template class provides a static member `tout` that represents the standard output stream (std::cout)
+     * for the `char` type and std::wcout for the `wchar_t` type.
+     *
+     * @tparam T The character type (`char` or `wchar_t`) used for the stream.
+     */
 	template <typename T>
 	class StreamWrapper
 	{
@@ -84,22 +119,47 @@ namespace Log
 		static std::basic_ostream<T> &tout;
 	};
 
+    /**
+     * @brief Specialization of StreamWrapper class for `char` type.
+     *
+     * This specialization sets `StreamWrapper<char>::tout` to std::cout.
+     */
 	template <>
 	std::ostream &StreamWrapper<char>::tout = std::cout;
 
+    /**
+     * @brief Specialization of StreamWrapper class for `wchar_t` type.
+     *
+     * This specialization sets `StreamWrapper<wchar_t>::tout` to std::wcout.
+     */
 	template <>
 	std::wostream &StreamWrapper<wchar_t>::tout = std::wcout;
 
 #if __cplusplus < 201703L
 
-#if defined _MSC_VER
-
+#if defined _WIN32
+    /**
+     * @brief Creates a directory using _mkdir function (Windows).
+     *
+     * This function creates a directory specified by the given path using the _mkdir function
+     * provided by Microsoft Visual C++ compiler (Windows).
+     *
+     * @param t_path The path of the directory to create.
+     */
 	static void t_mkdir(std::string t_path)
 	{
 		_mkdir(t_path.c_str());
 	}
 
 #elif defined __GNUC__
+    /**
+     * @brief Creates a directory using mkdir function (Unix/Linux).
+     *
+     * This function creates a directory specified by the given path using the mkdir function
+     * provided by GNU Compiler Collection (GCC) (Unix/Linux).
+     *
+     * @param t_path The path of the directory to create.
+     */
 	static void t_mkdir(std::string t_path)
 	{
 		mkdir(t_path.c_str(), 0777);
@@ -133,8 +193,10 @@ namespace Log
          ***************************************************************************/
 
 
-        /*
+        /**
+         * @brief Destructor for the Logger class.
          *
+         * Safely closes the log file associated with the logger instance.
          *
          */
 		virtual ~Logger() noexcept
@@ -143,10 +205,12 @@ namespace Log
 			m_ofs.close();
 		}
 
-		/*
-		 * Get single instance or create new object if not created
-		 * @return: single instance of Logger.
-		 */
+        /**
+         * @brief Gets the singleton instance of the Logger or creates a new instance if none exists.
+         *
+         * @return A shared pointer to the Logger instance.
+         *
+         */
 		static std::shared_ptr<Logger> get_instance()
 		{
 			if (m_logger_instance == nullptr)
@@ -156,56 +220,64 @@ namespace Log
 			return m_logger_instance;
 		}
 
-        /*
+        /**
+         * @brief Returns the path of the current log output file.
          *
-         *
+         * @return The path of the log output file as a string.
          */
 		static std::string log_output_get()
 		{
 			return m_log_path;
 		}
 
-        /*
+        /**
+         * @brief Returns the current logging priority level.
          *
-         *
+         * @return The logging priority level.
          */
 		static LogPriority log_priority_get()
 		{
 			return m_log_priority;
 		}
 
-        /*
+        /**
+         * @brief Returns the log message formatter.
          *
-         *
+         * @tparam T The character type used in the formatter.
+         * @return The log message formatter as a basic_string.
          */
 		static std::basic_string<T> formatter_get()
 		{
 			return m_format.formatter_get();
 		}
 
-        /*
+        /**
+         * @brief Returns the maximum file size limit for log files.
          *
-         *
+         * @return The maximum file size limit in bytes.
          */
 		static unsigned long long  file_limit_get()
 		{
 			return m_max_file_size;
 		}
 
-        /*
+        /**
+         * @brief Returns the current log output format.
          *
-         *
+         * @return The current log output format.
          */
 		static LogOutput log_format_get()
 		{
 			return m_log_output;
 		}
 
-		/*
-		 * Not set or call for stream to console
-		 * Set log path as std::basic_string for stream to file
-		 * @param t_file_path : file path.
-		 */
+        /**
+         * @brief Sets the log output to stream to a file with the specified file path.
+         *
+         * This function configures the Logger to output log messages to a file specified by the given file path.
+         *
+         * @param t_file_path The file path for logging output (stream to file).
+         */
 		static void log_output_set(const std::string& t_file_path)
 		{
 
@@ -213,21 +285,27 @@ namespace Log
 			m_log_path = t_file_path;
 		}
 
-		/*
-		 * Set log priority level.
-		 * @param t_log_priority: enum class LogPriority.
-		 */
+        /**
+         * @brief Sets the log priority level for filtering log messages.
+         *
+         * This function sets the log priority level, which determines the minimum log level required for messages to be logged.
+         *
+         * @param t_log_priority The log priority level to be set (enum class LogPriority).
+         */
 		static void log_priority_set(LogPriority t_log_priority)
 		{
 			std::lock_guard<std::mutex> _lock(m_mutex);
 			m_log_priority = t_log_priority;
 		}
 
-		/*
-		 * Get format type and pass to Formatter::getFormatter() function
-		 * default as %t %m
-		 * @param t_fmt :  format style as string.
-		 */
+        /**
+         * @brief Sets the log message format using a specified string.
+         *
+         * This function sets the log message format to the provided string using Formatter::formatter_set().
+         * The default format is "%t %m" if not specified.
+         *
+         * @param t_fmt The format style as a string.
+         */
 		static void formatter_set(const std::basic_string<T> &t_fmt)
 		{
 
@@ -235,21 +313,25 @@ namespace Log
             m_format.formatter_set(t_fmt);
 		}
 
-		/*
-		 * Set file's limit as byte.
-		 * @param t_fileLimit :  file size limit as byte.
-		 */
+        /**
+         * @brief Sets the maximum file size limit for log files.
+         *
+         * This function sets the maximum file size limit (in bytes) for log files.
+         *
+         * @param t_fileLimit The file size limit in bytes.
+         */
 		static void file_limit_set(unsigned long long t_fileLimit)
 		{
 			std::lock_guard<std::mutex> _lock(m_mutex);
 			m_max_file_size = t_fileLimit;
 		}
 
-		/*
-		 * Set output format
-		 * if m_log_path is empty then stream to console
-		 * if m_log_path is not empty then stream to file
-		 */
+        /**
+         * @brief Sets the log output format based on the configured log path.
+         *
+         * If the log path is empty, the output is directed to the console (LogOutput::Console).
+         * If the log path is not empty, the output is directed to a file (LogOutput::File), and the file is opened.
+         */
 		static void log_format_set()
 		{
 
@@ -264,18 +346,26 @@ namespace Log
 			}
 		}
 
-		/*
-		 * For Quiet log priority.
-		 * @param messageLevel:  Log Level.
-		 */
+        /**
+         * @brief Logs a message with a specified log priority level (no-op function).
+         *
+         * This function does nothing and serves as a placeholder for logging messages with specific priority levels.
+         *
+         * @param messageLevel The log priority level.
+         */
 		static void log(LogPriority messageLevel) 
 		{
 			(void)messageLevel;
 		}
 
-        /*
+        /**
+         * @brief Enables or disables the file reset feature.
          *
+         * This function allows enabling or disabling
+         * the behavior of resetting log files.
          *
+         * @param enable_file_reset If true, enables file reset;
+         * if false, disables file reset.
          */
 		static void enable_reset_file(bool enable_file_reset)
 		{
@@ -283,11 +373,22 @@ namespace Log
 			m_enable_file_reset = enable_file_reset;
 		}
 
-		/*
-		 * Log given message with defined parameters and pass LogMessage() function
-		 * @param messageLevel: Log Level
-		 * @param ...args: Variadic template arguments
-		 */
+
+        /**
+         * @brief Logs a message with a specified log priority level and additional arguments.
+         *
+         * This function logs a message with the specified log priority level and additional arguments.
+         * The message is formatted based on the log priority and forwarded to the appropriate log_message function.
+         *
+         * @param messageLevel The log priority level.
+         * @param args Additional arguments to be formatted into the log message.
+         *
+         * @tparam Args Variadic template arguments that represent the types of additional arguments.
+         *
+         * @note The log message is only processed if the specified messageLevel is less than or equal to the current log priority level (m_log_priority).
+         *       - LogPriority::Quiet messages are ignored.
+         *       - Messages are prefixed with the corresponding log level identifier (e.g., "FATAL:", "ERROR:", etc.).
+         */
 		template <typename... Args>
 		static void log(LogPriority messageLevel, Args &&...args)
 		{
@@ -331,27 +432,43 @@ namespace Log
 			}
 		}
 
+    /*******************************************************************    
+     * Private Members 
+     ******************************************************************/
 
+    private:
+        
+        /* data */
 
+        
+    /*******************************************************************    
+     * Protected Members 
+     ******************************************************************/
+ 
 	protected:
-		/*
-		 * Construct Logger class as singleton.
-		 * client can not access default constructor
-		 * if m_log_path string is empty select the stream as console
-		 * else select the stream as file
-		 */
+
+        /**
+         * @brief Constructs the Logger class as a singleton instance.
+         *
+         * This constructor initializes the Logger instance. If the log path string (m_log_path) is empty,
+         * it selects the console stream (LogOutput::Console); otherwise, it selects the file stream (LogOutput::File).
+         */
 		Logger() noexcept
 		{
             log_format_set();
 		}
 
 #if __cplusplus >= 201703L
-		/*
-		 * For C++17 and C++20 versions
-		 * Open file in UTF-8 standart in ofstream write or append mode
-		 * if the parent path not exist then create directory
-		 * @param t_path :  file path
-		 */
+		 /**
+         * @brief Opens a file with UTF-8 encoding in ofstream write or append mode.
+         *
+         * For C++17 and later versions, this function opens a file specified by the given filesystem path (t_path)
+         * in UTF-8 encoding using std::ofstream in write or append mode.
+         *
+         * If the parent directory of the file does not exist, it creates the directory.
+         *
+         * @param t_path The path to the file to be opened.
+         */
 		static void file_open(std::filesystem::path t_path)
 		{
 
@@ -391,12 +508,17 @@ namespace Log
 			}
 		}
 #else
-		/*
-		 * For C++14 and previous versions
-		 * Open file in UTF-8 standart in ofstream write or append mode
-		 * if the parent path not exist then create directory
-		 * @param t_path : file path
-		 */
+
+        /**
+         * @brief Opens a file with UTF-8 encoding in ofstream write or append mode.
+         *
+         * For C++14 and earlier versions, this function opens a file specified by the given string path (t_path)
+         * in UTF-8 encoding using std::ofstream in write or append mode.
+         *
+         * If the parent directory of the file does not exist, it creates the directory.
+         *
+         * @param t_path The path to the file to be opened.
+         */
 		static void file_open(const std::string &t_path)
 		{
 
@@ -421,7 +543,7 @@ namespace Log
 				}
 				t_mkdir(path);
 			}
-#if defined _MSC_VER
+#if defined _WIN32
 			m_ofs.imbue(std::locale(std::locale::empty(), new std::codecvt<wchar_t, char, mbstate_t>("en_US.utf8")));
 #else
 			m_ofs.imbue(std::locale(std::locale(), new std::codecvt<wchar_t, char, mbstate_t>));
@@ -431,11 +553,17 @@ namespace Log
 		}
 #endif
 
-		/*
-		 * Pass argumants to set Formatter::format() and take back as formatted string
-		 * and write the string to choosen stream in constructor
-		 * @param ...args: Variadic template arguments
-		 */
+        /**
+         * @brief Formats and logs a message to the chosen output stream.
+         *
+         * This function formats the provided arguments using Formatter::format() and writes
+         * the formatted message to the selected stream (file or console) based on the configured
+         * log output (m_log_output).
+         *
+         * @param args Variadic template arguments to be formatted into the log message.
+         *
+         * @tparam Args Variadic template parameter pack representing the types of the arguments.
+         */
 		template <typename... Args>
 		static void log_message(Args &&...args)
 		{
@@ -461,13 +589,16 @@ namespace Log
 			}
 		}
 
-		/*
-		 * Divides a String into an ordered list of substrings, puts these substrings into
-		 * a vector of string
-		 * @param t_str_split: basic_string<T>
-		 * @param Delim: Template argument
-		 * @return : result : vector<basic_string<T>>
-		 */
+        /**
+         * @brief Splits a string into substrings based on a specified delimiter and returns the result as a vector of strings.
+         *
+         * This function splits the input string (t_str_split) into multiple substrings using the provided delimiter (t_delim).
+         * The resulting substrings are stored in a vector of strings.
+         *
+         * @param t_str_split The string to be split.
+         * @param t_delim The delimiter character used for splitting.
+         * @return std::vector<std::string> A vector containing the split substrings.
+         */
 		static std::vector<std::string> split(const std::string &t_str_split,
                                               char t_delim)
 		{
@@ -482,7 +613,12 @@ namespace Log
 			return result;
 		}
 
+    /*******************************************************************    
+    * Protected Members 
+    ******************************************************************/
+    
 	protected:
+
 	    /**
          * @brief Holds file reset information.
          * 
@@ -553,50 +689,51 @@ namespace Log
 
 // Macro definitions for Logger::log()
 	
-#define LOG_QUIET()
-
-#if defined __GNUC__
-#define LOG_SET_FORMAT(formatter) Log::logger<char>::set_formatter(Formatter)
-
-#define LOG_SET_FILE_LIMIT(fileLimit) Log::logger<char>::set_file_limit(fileLimit)
-#define LOG_ENABLE_RESET_FILE(enable_reset_file)	\
-	Log::logger<char>::enable_reset_file(enable_reset_file)
-#define LOG_SET_OUTPUT(path)               \
-	Log::logger<char>::set_log_output(path); \
-	Log::logger<char>::set_log_format()
-#define LOG_SET_PRIORITY(severity) 		 \
-	Log::logger<char>::set_log_priority(static_cast<Log::LogPriority>(severity))
-
-#define LOG_FATAL(...) Log::logger<char>::log(Log::LogPriority::Fatal, __VA_ARGS__)
-#define LOG_ERROR(...) Log::logger<char>::log(Log::LogPriority::Error, __VA_ARGS__)
-#define LOG_WARNING(...) Log::logger<char>::log(Log::LogPriority::Warning, __VA_ARGS__)
-#define LOG_INFO(...) Log::logger<char>::log(Log::LogPriority::Info, __VA_ARGS__)
-#define LOG_VERBOSE(...) Log::logger<char>::log(Log::LogPriority::Verbose, __VA_ARGS__)
-#define LOG_DEBUG(...) Log::logger<char>::log(Log::LogPriority::Debug, __VA_ARGS__)
-#define LOG_TRACE(...) Log::logger<char>::log(Log::LogPriority::Trace, __VA_ARGS__)
-#endif
-
+#define log_quiet()
 #if defined _WIN32
-#define LOG_SET_FORMAT(formatter) Log::logger<wchar_t>::set_formatter(Formatter)
-#define LOG_ENABLE_RESET_FILE(enable_reset_file)	\
-	Log::logger<wchar_t>::enable_reset_file(enable_reset_file)
-#define LOG_SET_OUTPUT(path)                  \
-	Log::logger<wchar_t>::set_log_output(path); \
-	Log::logger<wchar_t>::set_log_format()
-#define LOG_SET_FILE_LIMIT(fileLimit) 		\
-	Log::logger<wchar_t>::set_file_limit(fileLimit)
 
-#define LOG_SET_PRIORITY(severity)			\
-	Log::logger<wchar_t>::set_log_priority(static_cast<Log::LogPriority>(severity))
+#define log_set_format(formatter) Log::Logger<char>::formatter_set(formatter)
 
-#define LOG_FATAL(...) Log::logger<wchar_t>::log(Log::LogPriority::Fatal, __VA_ARGS__)
-#define LOG_ERROR(...) Log::logger<wchar_t>::log(Log::LogPriority::Error, __VA_ARGS__)
-#define LOG_WARNING(...) Log::logger<wchar_t>::log(Log::LogPriority::Warning, __VA_ARGS__)
-#define LOG_INFO(...) Log::logger<wchar_t>::log(Log::LogPriority::Info, __VA_ARGS__)
-#define LOG_VERBOSE(...) Log::logger<wchar_t>::log(Log::LogPriority::Verbose, __VA_ARGS__)
-#define LOG_DEBUG(...) Log::logger<wchar_t>::log(Log::LogPriority::Debug, __VA_ARGS__)
-#define LOG_TRACE(...) Log::logger<wchar_t>::log(Log::LogPriority::Trace, __VA_ARGS__)
+#define log_set_file_limit(fileLimit) Log::Logger<char>::file_limit_set(fileLimit)
+#define log_enable_reset_file(enable_reset_file)	\
+	Log::Logger<char>::enable_reset_file(enable_reset_file)
+#define log_set_output(path)               \
+	Log::Logger<char>::log_output_set(path); \
+	Log::Logger<char>::log_format_set()
+#define log_set_priority(severity) 		 \
+	Log::Logger<char>::log_priority_set(static_cast<Log::LogPriority>(severity))
+
+#define log_fatal(...) Log::Logger<char>::log(Log::LogPriority::Fatal, __VA_ARGS__)
+#define log_error(...) Log::Logger<char>::log(Log::LogPriority::Error, __VA_ARGS__)
+#define log_warn(...) Log::Logger<char>::log(Log::LogPriority::Warning, __VA_ARGS__)
+#define log_info(...) Log::Logger<char>::log(Log::LogPriority::Info, __VA_ARGS__)
+#define log_ver(...) Log::Logger<char>::log(Log::LogPriority::Verbose, __VA_ARGS__)
+#define log_debug(...) Log::Logger<char>::log(Log::LogPriority::Debug, __VA_ARGS__)
+#define log_trace(...) Log::Logger<char>::log(Log::LogPriority::Trace, __VA_ARGS__)
 #endif
+
+#if not defined _WIN32
+#define log_set_format(formatter) Log::Logger<wchar_t>::formatter_set(formatter)
+#define log_enable_reset_file(enable_reset_file)	\
+	Log::Logger<wchar_t>::enable_reset_file(enable_reset_file)
+#define log_set_output(path)                  \
+	Log::Logger<wchar_t>::log_output_set(path); \
+	Log::Logger<wchar_t>::log_format_set()
+#define log_set_file_limit(fileLimit) 		\
+	Log::Logger<wchar_t>::file_limit_set(fileLimit)
+
+#define log_set_priority(severity)			\
+	Log::Logger<wchar_t>::log_priority_set(static_cast<Log::LogPriority>(severity))
+
+#define log_fatal(...) Log::Logger<wchar_t>::log(Log::LogPriority::Fatal, __VA_ARGS__)
+#define log_error(...) Log::Logger<wchar_t>::log(Log::LogPriority::Error, __VA_ARGS__)
+#define log_warn(...) Log::Logger<wchar_t>::log(Log::LogPriority::Warning, __VA_ARGS__)
+#define log_info(...) Log::Logger<wchar_t>::log(Log::LogPriority::Info, __VA_ARGS__)
+#define log_ver(...) Log::Logger<wchar_t>::log(Log::LogPriority::Verbose, __VA_ARGS__)
+#define log_debug(...) Log::Logger<wchar_t>::log(Log::LogPriority::Debug, __VA_ARGS__)
+#define log_trace(...) Log::Logger<wchar_t>::log(Log::LogPriority::Trace, __VA_ARGS__)
+#endif
+
 
 // Intialize static data members
 template <typename T>

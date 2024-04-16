@@ -6,7 +6,7 @@
 using namespace Log;
 
 
-void test(std::weak_ptr<logger<char>> log_ptr, size_t i) {
+void test(std::weak_ptr<Logger<char>> log_ptr, size_t i) {
 
 	auto t_sharedlockptr = log_ptr.lock();
 
@@ -18,11 +18,12 @@ void test(std::weak_ptr<logger<char>> log_ptr, size_t i) {
 
 
 int main() {
-	logger_c::set_log_output("log/log.txt");
-	logger_c::set_log_priority(LogPriority::Fatal);
+	logger_c::log_output_set("log/log.txt");
+	logger_c::log_priority_set(LogPriority::Fatal);
 	auto log = logger_c::get_instance();
 	const size_t sizeThread = std::thread::hardware_concurrency();
 	std::vector<std::thread> t_vec;
+    std::cout <<"hardware concurrency : " <<std::thread::hardware_concurrency << "\n";
 
 	for (size_t i = 0; i < sizeThread; i++) {
 		t_vec.push_back(std::thread(test, log, i));

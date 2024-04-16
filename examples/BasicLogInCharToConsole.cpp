@@ -5,9 +5,9 @@ using namespace Log;
 
 int main() {
 
-	logger<char>::set_log_priority(LogPriority::Trace);
-	auto log = logger<char>::get_instance();
-	log->set_formatter("%m %t");
+	Logger<char>::log_priority_set(LogPriority::Trace);
+	auto log = Logger<char>::get_instance();
+	log->formatter_set("%m %t");
 	log->log(LogPriority::Quiet);
 
 	log->log(LogPriority::Quiet);

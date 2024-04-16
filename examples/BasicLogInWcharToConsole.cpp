@@ -6,9 +6,9 @@ using namespace Log;
 
 int main() {
 	
-	logger_w::set_log_priority(LogPriority::Verbose);
+	logger_w::log_priority_set(LogPriority::Verbose);
 	auto log = logger_w::get_instance();
-	log->set_formatter(L" %t %m");
+	log->formatter_set(L" %t %m");
 	//log->setFileLimit(2_mb);
 
 	log->log(LogPriority::Quiet);

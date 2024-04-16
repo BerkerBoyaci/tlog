@@ -5,11 +5,11 @@ using namespace Log;
 
 int main() {
 
-	logger<char>::set_log_output("basicLog/log/log.txt");
-	logger<char>::set_log_priority(LogPriority::Debug);
-	auto log = logger<char>::get_instance();
-	log->set_file_limit(10_mb);
-	log->set_formatter("%t %m");
+	Logger<char>::log_output_set("basicLog/log/log.txt");
+	Logger<char>::log_priority_set(LogPriority::Debug);
+	auto log = Logger<char>::get_instance();
+	log->file_limit_set(2_mb);
+	log->formatter_set("%t %m");
 	log->log(LogPriority::Quiet);
 
 	auto start1 = std::chrono::high_resolution_clock::now();

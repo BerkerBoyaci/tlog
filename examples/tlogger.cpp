@@ -56,11 +56,11 @@ int main() {
 #else 
 	/* Create log ->*/
 
-	logger_c::set_log_output("log.txt");
-	logger_c::set_log_priority(LogPriority::Debug);
+	logger_c::log_output_set("log.txt");
+	logger_c::log_priority_set(LogPriority::Debug);
 	auto log = logger_c::get_instance();
-	log->set_formatter("%m %l %t %f"); 
-	log->set_file_limit(100);
+	log->formatter_set("%m %l %t %f");
+	log->file_limit_set(100);
 
 	auto start1 = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < 100'000; i++)

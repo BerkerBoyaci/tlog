@@ -5,11 +5,11 @@ using namespace Log;
 
 int main() {
 
-	logger_w::set_log_output("log.txt");
-	logger_w::set_log_priority(LogPriority::Trace);
+	logger_w::log_output_set("log.txt");
+	logger_w::log_priority_set(LogPriority::Trace);
 	auto log = logger_w::get_instance();
-	log->set_file_limit(1_mb);
-	log->set_formatter(L" %m %t");
+	log->file_limit_set(1_mb);
+	log->formatter_set(L" %m %t");
 	log->log(LogPriority::Quiet);
 
 	log->log(LogPriority::Quiet);

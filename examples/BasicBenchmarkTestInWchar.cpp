@@ -4,11 +4,11 @@
 using namespace Log;
 
 int main() {
-	logger_w::set_log_output(L"basicLog/log/log.txt");
-	logger_w::set_log_priority(LogPriority::Debug);
+	logger_w::log_output_set("basicLog/log/log.txt");
+	logger_w::log_priority_set(LogPriority::Debug);
 	auto log = logger_w::get_instance();
-	log->set_file_limit(10*1024*1024);
-	log->set_formatter(L"%t %m");
+	log->file_limit_set(10*1024*1024);
+	log->formatter_set(L"%t %m");
 	log->log(LogPriority::Quiet);
 
 	auto start1 = std::chrono::high_resolution_clock::now();
